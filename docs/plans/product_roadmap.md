@@ -104,6 +104,12 @@ T-shaped leaders, founders, or architects with:
 - [x] **Documentation & Examples** - Comprehensive guides and templates
 - [x] **Community Features** - Open source preparation and contribution systems
 
+### Phase 5: Bootstrap Implementation (Weeks 17-18)
+- [ ] **Bootstrap Script Development** - Implement Python bootstrap installer with interactive and fast modes
+- [ ] **Installation Automation** - Automated project setup and framework installation
+- [ ] **User Onboarding** - Streamlined first-time user experience
+- [ ] **Distribution Ready** - Complete installation package for framework distribution
+
 ## Future Ideas Backlog
 
 ### Advanced Features
@@ -137,5 +143,5 @@ SpecPilot is the only framework that transforms experienced architects into elit
 
 ---
 
-**Roadmap Status**: ✅ **MVP COMPLETE** - All 4 phases fully implemented
+**Roadmap Status**: 🚧 **BOOTSTRAP IN PROGRESS** - MVP complete, implementing installation automation
 **Next Phase**: 🚀 **Launch & Adoption** - Begin user validation and community building

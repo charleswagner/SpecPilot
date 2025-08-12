@@ -138,9 +138,42 @@ This roadmap maps the current implementation status of the SpecPilot framework a
 
 ---
 
-## Additional Framework Features ✅ **COMPLETED**
+## Phase 5: Bootstrap Implementation (Weeks 17-18)
 
-### ✅ **Advanced Validation Framework**
+### Bootstrap Script Development
+- [ ] **Python Installer Script** - `bootstrap.py` with interactive and fast modes
+- [ ] **Interactive Mode** - Full guided onboarding with user questions and choices
+- [ ] **Fast Mode** - Automated setup with command-line arguments
+- [ ] **Project Structure Creation** - Automatic directory and file generation
+- [ ] **Framework Installation** - Copy SpecPilot engine to target project
+- [ ] **User Workspace Setup** - Create personalized workspace with configuration
+- [ ] **Documentation Templates** - Generate all required project documents
+- [ ] **Configuration Management** - Set up project-specific overrides and settings
+
+### Installation Automation
+- [ ] **Environment Validation** - Check Git repository, Python version, permissions
+- [ ] **File Management** - Safe file creation and conflict resolution
+- [ ] **Error Handling** - Graceful failure with clear error messages
+- [ ] **User Confirmation** - Approval for destructive operations
+- [ ] **Progress Feedback** - Real-time status updates during installation
+
+### User Onboarding
+- [ ] **Welcome Experience** - Animated ASCII art and professional messaging
+- [ ] **Project Identity Setup** - Collect project name, description, and goals
+- [ ] **Development Philosophy** - Configure Enterprise/Scalable/Vibe approaches
+- [ ] **Mode Configuration** - Set up all 10 development modes with preferences
+- [ ] **Notepad System** - Initialize developer notes and organization
+
+### Distribution Ready
+- [ ] **Portable Installation** - Python standard library only, no external dependencies
+- [ ] **Cross-Platform Support** - Windows, macOS, and Linux compatibility
+- [ ] **Command-Line Interface** - Professional CLI with help and options
+- [ ] **Installation Verification** - Post-installation validation and testing
+- [ ] **Documentation Integration** - Help text and usage examples
+
+---
+
+## Additional Framework Features ✅ **COMPLETED**
 - [x] **CRITICAL/WARN Classification** - Severity-based violation classification
 - [x] **Architecture Comprehensiveness** - Complete coverage validation
 - [x] **Implementation-Architecture Alignment** - Continuous validation system
