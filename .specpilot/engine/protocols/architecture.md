@@ -85,7 +85,7 @@ A technical roadmap is considered **COMPLETE** when all of the following element
 - **Check Readiness**: Determine if architecture is ready for technical roadmap generation
 
 1.  **Pre-Architecture Analysis**: 
-    - Log `🏛️ - [MODE_SWITCH] - Switched to Architecture Mode`
+    - Use Logging Helper to write: `🏛️` `MODE_SWITCH` `Switched to Architecture Mode` (full timestamped prefix required)
     - Before proposing architectural changes, perform comprehensive validation:
     - **Current Implementation Assessment**: Analyze existing `src/` codebase against current architecture
     - **Roadmap Alignment Analysis**: Identify technical roadmap components lacking architectural coverage

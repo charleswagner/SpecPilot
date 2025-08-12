@@ -42,7 +42,7 @@ A bootstrap setup is considered **COMPLETE** when:
 - **Check Readiness**: Determine if project is ready for Product Mode
 
 1.  When I say **"Bootstrap new project,"**:
-    - Log `🌱 - [MODE_SWITCH] - Switched to Bootstrap Mode`
+    - Use Logging Helper to write: `🌱` `MODE_SWITCH` `Switched to Bootstrap Mode` (full timestamped prefix required)
     - Await my next message, which will be the project brief.
 
 2.  Analyze the brief to determine a `project_name` (in snake_case).

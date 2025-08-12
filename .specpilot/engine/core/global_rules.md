@@ -1,12 +1,25 @@
 ### ## Global Rules & Principles
 
-0. CRITICAL : STARTING STEPS AND CHANGING MODES: WHENEVER CHANGING MODES OR STARTING A STEP ALWAYS FIRST VERIFY YOUR PROTOCAL. TO NOT OPTIMIZE FOR SPEED. OPTIMIZE FOR CORRECTNESS IN YOUR BEHAVIOR.
+0. **CRITICAL PROTOCOL ENFORCEMENT**: WHENEVER CHANGING MODES OR STARTING A STEP, YOU MUST:
+   - **FIRST**: Read the corresponding protocol file from `.specpilot/engine/protocols/[mode_name].md`
+   - **SECOND**: Follow every step exactly as written in the protocol
+   - **THIRD**: Execute logging commands exactly as specified in the protocol
+   - **NEVER**: Skip steps, improvise, or rely on memory
+   - **ALWAYS**: Optimize for correctness over speed
+   - **ENFORCE**: Every protocol requirement must be fulfilled before proceeding
 
 1. **Mode Operation**: You must operate in one of eleven modes: **Initialization Mode**, **Pilot Mode**, **Bootstrap Mode**, **Architecture Mode**, **Design Mode**, **Spec Mode**, **Vibe Mode**, **Deep Check Mode**, **Scripts Mode**, **Product Mode**, or **Commit Mode**. You **MUST** start in `Initialization Mode`. This mode will only be run once at the beginning of a session.
 
 2. **Sources of Truth**: The `docs/plans/architecture.md` and `docs/project_conventions.md` files, if they exist, are primary sources of truth. Their principles and rules must be considered and adhered to in all modes.
 
-3. **Logging**: You must adhere to the two-tiered logging system defined in the `Global Logging Rules` section.
+3. **Logging**: You must adhere to the two-tiered logging system defined in the `Global Logging Rules` section. **CRITICAL: All logging MUST use the Logging Helper interface defined in `reference/logging_rules.md`.**
+
+**Mandatory Logging Requirements:**
+- **Namespaced Paths**: All logs MUST be written to `.specpilot/workspace/[current_user_id]/logs/` (never to non-namespaced paths)
+- **Timestamped Prefixes**: Every log entry MUST include `YYYY-MM-DD HH:%M:%S - [current_user_id] - emoji - [EVENT_TYPE] - message`
+- **Verbose Batching**: A `TRANSCRIPT_BATCH` MUST be written to `specpilot_verbose.log` at the start of every assistant response and before any commit operation
+- **Logging Helper**: Use the Logging Helper interface instead of writing raw strings - inputs: `event_emoji`, `event_type`, `message`
+- **EXECUTION ENFORCEMENT**: When protocols specify logging, you MUST execute the actual logging commands, not just read the text
 
 4. **Naming Convention**: You must adhere to the project's file naming convention.
 
@@ -23,3 +36,5 @@
 10. **Config Mode Activation**: You must listen for commands like "Configure SpecPilot:" or "Config Mode" and automatically enter Config Mode to display the configuration interface and handle update requests.
 
 11. **Strategic Analysis Command**: You must listen for the command "Run a strategic analysis" and execute it by loading the run_strategic_analysis.md command file.
+
+12. **Protocol Reading Enforcement**: Before executing any mode or command, you MUST read the corresponding protocol file from `.specpilot/engine/protocols/` or command file from `.specpilot/engine/commands/` to ensure you follow the exact specifications.

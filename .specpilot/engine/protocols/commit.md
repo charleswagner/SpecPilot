@@ -2,7 +2,7 @@
 
 This mode is for when a feature milestone is complete and ready to be committed.
 
-1. When I say **"Prepare a commit,"** you should first ask: **"Have you considered running a deep check protocal first?"** ALWAYS ask to run the Deep Check Protocall. IMPORTANT : Always Await my response before proceeding. You must have my explicit approval to continue without a deep check first.
+1. When I say **"Prepare a commit,"** you should first ask: **"Have you considered running a deep check protocal first?"** ALWAYS ask to run the Deep Check Protocall. IMPORTANT : Always Await my response before proceeding. You must have my explicit approval to continue without a deep check first. Use Logging Helper to write a `MODE_SWITCH` into the milestone log, and append a `TRANSCRIPT_BATCH` to the verbose log immediately before committing.
 
 2. **Automatically analyze development logs**: Read both `.specpilot/workspace/logs/specpilot.log` and `.specpilot/workspace/logs/specpilot_verbose.log` to extract:
    - All `[MODE_SWITCH]` events to understand the development flow

@@ -3,7 +3,7 @@
 This mode is for managing SpecPilot framework configuration. It can **NEVER** be started Pilotly.
 
 1. **Config Mode Activation**: When I say **"Configure SpecPilot:"** or **"Config Mode"**, you must:
-   - Log `[MODE_SWITCH] - Switched to Config Mode`
+   - Use Logging Helper to write: `⚙️` `MODE_SWITCH` `Switched to Config Mode` (full timestamped prefix required)
    - Read the current `.specpilot/workspace/config/config.json` file (project override)
    - If the override file doesn't exist, read `.specpilot/engine/config_default.json` (default config)
    - Display the comprehensive configuration interface
@@ -35,13 +35,13 @@ This mode is for managing SpecPilot framework configuration. It can **NEVER** be
    ```
 
 3. **Configuration Update Commands**: When the user says **"Update Config [option] [value]"**, you must:
-   - Log `[CONFIG_UPDATE_REQUESTED]` with the requested change
+   - Use Logging Helper to write: `🔧` `CONFIG_UPDATE_REQUESTED` with the requested change
    - Validate the option exists in the Configuration Reference
    - Validate the value type and format
    - Update the `.specpilot/workspace/config/config.json` file (project override)
    - If the override file doesn't exist, create it with the default structure
    - Preserve the `_warning` comment at the top
-   - Log `[CONFIG_UPDATED]` with the specific changes made
+   - Use Logging Helper to write: `✅` `CONFIG_UPDATED` with the specific changes made
    - Display confirmation message with new value
    - Show the updated configuration interface
 
@@ -55,8 +55,8 @@ This mode is for managing SpecPilot framework configuration. It can **NEVER** be
 5. **Configuration Verification**: After updating, you must:
    - Verify the file is valid JSON
    - Confirm the changes were applied correctly
-   - Log `[CONFIG_VERIFIED]` with the final configuration state
+   - Use Logging Helper to write: `🔍` `CONFIG_VERIFIED` with the final configuration state
 
 6. **Config Mode Exit**: When the user says **"exit config"**, you must:
-   - Log `[MODE_SWITCH] - Exited Config Mode`
+   - Use Logging Helper to write: `🚪` `MODE_SWITCH` `Exited Config Mode`
    - Return to normal operation mode

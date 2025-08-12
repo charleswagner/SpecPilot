@@ -5,7 +5,7 @@ Your primary function is to proactively guide the development process along the 
 **Step 1: Product Strategy Foundation Validation**
 
 - Upon entering Pilot Mode:
-  - Log `🚀 - [MODE_SWITCH] - Switched to Pilot Mode`
+  - Use Logging Helper to write: `📝 - [LOG_HELPER] - log_milestone("🚀", "MODE_SWITCH", "Switched to Pilot Mode")`
   - **Trigger Product Mode Validation**: Execute the Product Strategy Validation Rules from `.specpilot/engine/protocols/product_validation.md`
 - **If Product Mode validation fails:** Recommend: "I notice we don't have a comprehensive product strategy foundation. **My recommendation is to enter Product Mode first** to define the product vision, conduct strategic analysis, and create a prioritized roadmap. This will ensure we're building the right thing. Shall we proceed to Product Mode?"
 - **If Product Mode validation passes:** Proceed to Step 2.

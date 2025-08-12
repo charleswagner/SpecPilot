@@ -2,11 +2,11 @@
 
 This is the master startup mode. Upon activation, you must immediately and automatically establish logging infrastructure, then perform a systematic pre-flight check of the project's foundational documents.
 
-1.  **User Identification & Workspace Setup**: As per the main orchestrator's boot sequence, identify the user by checking for `.specpilot.local` first, then falling back to Git. Once the `current_user_id` is determined, verify that their workspace directory exists at `.specpilot/workspace/[current_user_id]/`. If it does not, create it along with its subdirectories (`logs`, `notepads`).
+1.  **User Identification & Workspace Setup**: As per the main orchestrator's boot sequence, identify the user by checking for `.specpilot.local` first, then falling back to Git. Once the `current_user_id` is determined, verify that their workspace directory exists at `.specpilot/workspace/[current_user_id]/`. If it does not, create it along with its subdirectories (`logs`, `notepads`). Use Logging Helper to log: `📝 - [LOG_HELPER] - log_milestone("🚦", "USER_IDENTIFIED", "User identified as [current_user_id]")`
 
-2.  **Logging Initialization**: Set up logging format with prefixes: `YYYY-MM-DD HH:MM:SS - username - mode_emoji - [EVENT_TYPE] - content` and begin logging complete transcripts immediately to `.specpilot/workspace/logs/specpilot_verbose.log` with proper prefixes. Log milestone events to `.specpilot/workspace/logs/specpilot.log`. Log the initialization start: `[MODE_SWITCH] - Switched to Initialization Mode`
+2.  **Logging Initialization**: Use Logging Helper to ensure `.specpilot/workspace/[current_user_id]/logs/` exists: `📝 - [LOG_HELPER] - ensure_logs_directory()`. If logs exist under a different user (e.g., `cursor/`), migrate them: `📝 - [LOG_HELPER] - migrate_logs_if_needed()`. Log the initialization start: `📝 - [LOG_HELPER] - log_milestone("🚦", "MODE_SWITCH", "Switched to Initialization Mode")`. Begin batched transcripts: `📝 - [LOG_HELPER] - log_verbose("Initialization Mode activated - beginning systematic project validation")`.
 
-3.  **Perform Systematic Check**: In order, check for the existence of the following files:
+3.  **Perform Systematic Check**: In order, check for the existence of the following files. Log each validation step: `📝 - [LOG_HELPER] - log_milestone("🔍", "SYSTEMATIC_CHECK", "Beginning systematic validation of foundational documents")`
     1. `README.md`
     2. `docs/project_conventions.md`
     3. `docs/plans/product_roadmap.md`
@@ -98,6 +98,6 @@ This is the master startup mode. Upon activation, you must immediately and autom
 
     **💡 Quick Reference**: Each mode has specific protocols and expectations. Use the appropriate mode for your current development phase to get the most effective assistance.
 
-6.  **Final Step**: After completing the systematic check and providing the modes overview, announce completion and guide the user to the next step:
+6.  **Final Step**: After completing the systematic check and providing the modes overview, announce completion and guide the user to the next step. Log completion: `📝 - [LOG_HELPER] - log_milestone("✅", "INITIALIZATION_COMPLETE", "SpecPilot framework initialization complete - ready for development")`
 
     "Initialization complete. The framework is now ready to guide you. **To begin the guided development process, say 'Enter Pilot Mode'.**"

@@ -49,7 +49,7 @@ This project uses a two-tiered logging system. For every significant action, you
 
 **CRITICAL: All logging must happen CONTINUOUSLY throughout project work. Logging should be done by appending to log files during conversations to maintain complete development audit trails.**
 
-**IMPLEMENTATION NOTE: Logging uses a batched milestone approach - milestone events are logged immediately to .specpilot/workspace/logs/specpilot.log, while verbose transcripts are collected and batched for writing only at specific trigger points: (1) right before code commits, and (2) at the start of responding to prompts. This minimizes visible logging operations while maintaining complete audit trails.**
+**IMPLEMENTATION NOTE: Logging uses a batched milestone approach - milestone events are logged immediately to .specpilot/workspace/[current_user_id]/logs/specpilot.log, while verbose transcripts are collected and batched for writing only at specific trigger points: (1) right before code commits, and (2) at the end of completed command/response cycles. This minimizes visible logging operations while maintaining complete audit trails.**
 
 **VERBOSE LOGGING FORMAT**: For verbose log transcripts, use a single timestamp prefix for the entire entry, followed by clean transcript content without additional prefixes. This allows efficient appending of complete interactions while maintaining timestamp tracking.
 
@@ -64,10 +64,22 @@ Use terminal commands to efficiently append batched conversations at:
 - Start of responding to prompts
 - Right before code commits
 
+**EFFICIENT TRANSCRIPT BATCHING**: Use a single command to write the entire transcript batch at once:
+
+```bash
+cat << 'EOF' >> .specpilot/workspace/[current_user_id]/logs/specpilot_verbose.log
+$(date +"%Y-%m-%d %H:%M:%S") - [current_user_id] - [emoji] - [TRANSCRIPT_BATCH] - [description]
+---
+USER: [user message]
+---
+CURSOR: [assistant response]
+EOF
+```
+
 Alternative Command Options (use any to avoid EOF stalling):
-1. echo "$(date +"%Y-%m-%d %H:%M:%S") - content" >> .specpilot/workspace/logs/specpilot_verbose.log
-2. printf "content\n" >> .specpilot/workspace/logs/specpilot_verbose.log
-3. echo "content" | tee -a .specpilot/workspace/logs/specpilot_verbose.log >/dev/null
+1. echo "$(date +"%Y-%m-%d %H:%M:%S") - content" >> .specpilot/workspace/[current_user_id]/logs/specpilot_verbose.log
+2. printf "content\n" >> .specpilot/workspace/[current_user_id]/logs/specpilot_verbose.log
+3. echo "content" | tee -a .specpilot/workspace/[current_user_id]/logs/specpilot_verbose.log >/dev/null
 
 Batch format:
 username - emoji - [TRANSCRIPT_BATCH] - Session conversations
@@ -112,3 +124,37 @@ username - emoji - [TRANSCRIPT_BATCH] - Session conversations
   - **Git Proposals & Success**:
     `▶️ - [GIT_COMMIT_PROPOSAL] - ...`
     `✅ - [GIT_COMMIT_SUCCESS] - ...` with a `###` separator.
+
+## Canonical Log Destinations (namespaced)
+
+All logging MUST use the current user's namespaced workspace paths:
+
+- Milestone log: `.specpilot/workspace/[current_user_id]/logs/specpilot.log`
+- Verbose log (batched transcripts): `.specpilot/workspace/[current_user_id]/logs/specpilot_verbose.log`
+
+The `[current_user_id]` MUST be resolved per the boot sequence (see `main.md` and `initialization.md`). Do not write to non-namespaced paths.
+
+## Logging Helper (required interface)
+
+All protocols MUST use this helper behavior instead of writing raw strings:
+
+- Inputs: `event_emoji`, `event_type`, `message`
+- Milestone write (immediate): Append one line to `specpilot.log` in this exact format:
+  `YYYY-MM-DD HH:MM:SS - [current_user_id] - {event_emoji} - [{event_type}] - {message}`
+- Verbose batching: At batching triggers, append a transcript block to `specpilot_verbose.log`:
+  `current_user_id - mode_emoji - [TRANSCRIPT_BATCH] - Session conversations` followed by `---` fenced sections for USER/CURSOR turns per the existing template.
+- Create-on-missing: Ensure the logs directory exists; if created, first write `[LOG_DIR_CREATED]` to the milestone log.
+- Migration-on-mismatch: If logs exist under a different user (e.g., `cursor/`), move them into the current user's logs and write `[LOGS_MIGRATED]` with source and destination.
+- Error handling: On any write failure, write `⚠️ - [AI_ERROR] - Logging failure at [path]: [error]` to whichever file can be written.
+
+## Batching Triggers (enforced)
+
+You MUST append a transcript batch to the verbose log at:
+- The end of every completed command/response cycle
+- Immediately before any commit operation
+
+If batching is not possible in a given runtime, write an immediate one-turn transcript entry as a fallback.
+
+## Event Format (non-optional prefix)
+
+Every milestone line MUST include the timestamp and username prefix as defined above. The short examples in protocols (e.g., `🚀 - [MODE_SWITCH] - …`) are symbolic; do not write them verbatim to files.
