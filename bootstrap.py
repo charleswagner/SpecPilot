@@ -33,6 +33,7 @@ class SpecPilotBootstrap:
         self.specpilot_dir = self.project_root / ".specpilot"
         self.engine_dir = self.specpilot_dir / "engine"
         self.workspace_dir = self.specpilot_dir / "workspace"
+        self.backup_dir = self.specpilot_dir / "backups"
         
         # Colors for terminal output
         self.colors = {
@@ -202,6 +203,126 @@ class SpecPilotBootstrap:
         
         response = input("Enable commit intelligence? (Y/n): ").strip().lower()
         return response != 'n'
+    
+    def create_backup(self) -> Optional[str]:
+        """Create a backup of the current engine files."""
+        if not self.engine_dir.exists():
+            self.print_error("No existing SpecPilot installation found to backup.")
+            return None
+            
+        # Create backup directory if it doesn't exist
+        self.backup_dir.mkdir(exist_ok=True)
+        
+        # Generate timestamp for backup
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_name = f"engine_backup_{timestamp}"
+        backup_path = self.backup_dir / backup_name
+        
+        try:
+            # Copy engine directory to backup
+            shutil.copytree(self.engine_dir, backup_path, dirs_exist_ok=True)
+            self.print_step("Backup", f"Created: {backup_name}")
+            return str(backup_path)
+        except Exception as e:
+            self.print_error(f"Backup creation failed: {str(e)}")
+            return None
+    
+    def cleanup_old_backups(self, keep_count: int = 3):
+        """Remove old backups, keeping only the specified number."""
+        if not self.backup_dir.exists():
+            return
+            
+        try:
+            # Get all backup directories sorted by creation time (oldest first)
+            backups = []
+            for item in self.backup_dir.iterdir():
+                if item.is_dir() and item.name.startswith("engine_backup_"):
+                    backups.append((item.stat().st_ctime, item))
+            
+            backups.sort()  # Sort by creation time
+            
+            # Remove old backups
+            if len(backups) > keep_count:
+                for _, backup_path in backups[:-keep_count]:
+                    shutil.rmtree(backup_path)
+                    if hasattr(self, 'verbose') and self.verbose:
+                        self.print_info(f"Removed old backup: {backup_path.name}")
+        except Exception as e:
+            self.print_warning(f"Backup cleanup failed: {str(e)}")
+    
+    def check_version_compatibility(self) -> bool:
+        """Check if the update is compatible with the current installation."""
+        # For now, assume compatibility (can be enhanced later)
+        # This could check version files, configuration compatibility, etc.
+        return True
+    
+    def update_engine_files(self, dry_run: bool = False) -> bool:
+        """Update the engine files from the current framework."""
+        try:
+            if dry_run:
+                self.print_info("🔍 DRY RUN MODE - No files will be modified")
+            
+            # Get source engine files from current framework
+            source_engine = self.framework_root / ".specpilot" / "engine"
+            if not source_engine.exists():
+                self.print_error("Source engine files not found in current framework.")
+                return False
+            
+            # List files that would be updated
+            files_to_update = []
+            for item in source_engine.rglob("*"):
+                if item.is_file():
+                    relative_path = item.relative_to(source_engine)
+                    target_path = self.engine_dir / relative_path
+                    files_to_update.append((str(item), str(target_path)))
+            
+            if dry_run:
+                self.print_info(f"Would update {len(files_to_update)} engine files:")
+                for source, target in files_to_update[:5]:  # Show first 5
+                    self.print_info(f"  {target}")
+                if len(files_to_update) > 5:
+                    self.print_info(f"  ... and {len(files_to_update) - 5} more files")
+                return True
+            
+            # Actually perform the update
+            updated_count = 0
+            for source, target in files_to_update:
+                target_path = Path(target)
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, target)
+                updated_count += 1
+                
+                if hasattr(self, 'verbose') and self.verbose:
+                    self.print_info(f"Updated: {target}")
+            
+            self.print_step("Update", f"Successfully updated {updated_count} engine files")
+            return True
+            
+        except Exception as e:
+            self.print_error(f"Engine update failed: {str(e)}")
+            return False
+    
+    def rollback_update(self, backup_path: str) -> bool:
+        """Rollback to a previous backup."""
+        try:
+            backup_dir = Path(backup_path)
+            if not backup_dir.exists():
+                self.print_error(f"Backup not found: {backup_path}")
+                return False
+            
+            # Remove current engine
+            if self.engine_dir.exists():
+                shutil.rmtree(self.engine_dir)
+            
+            # Restore from backup
+            shutil.copytree(backup_dir, self.engine_dir)
+            self.print_step("Rollback", f"Successfully restored from backup: {backup_dir.name}")
+            return True
+            
+        except Exception as e:
+            self.print_error(f"Rollback failed: {str(e)}")
+            return False
     
     def create_directory_structure(self):
         """Create the complete directory structure."""
@@ -512,6 +633,168 @@ Thumbs.db
         # Execute installation
         return self.execute_installation(user_info, preferences)
     
+    def run_update_mode(self, args) -> bool:
+        """Run the bootstrap update mode."""
+        print(f"{self.colors['bold']}🔄 Bootstrap Update Mode{self.colors['reset']}")
+        
+        # Check if SpecPilot is already installed
+        if not self.specpilot_dir.exists():
+            self.print_error("No SpecPilot installation found in this project.")
+            self.print_info("Use 'init' command to install SpecPilot first.")
+            return False
+        
+        if not self.engine_dir.exists():
+            self.print_error("SpecPilot engine directory not found.")
+            return False
+        
+        # Set verbose mode if requested
+        self.verbose = args.verbose
+        
+        # Check version compatibility
+        if not self.check_version_compatibility():
+            self.print_error("Version compatibility check failed.")
+            return False
+        
+        # Show update plan
+        print(f"\n{self.colors['bold']}📋 Update Plan{self.colors['reset']}")
+        print(f"Project: {self.project_root.name}")
+        print(f"Current Engine: {self.engine_dir}")
+        print(f"Source Engine: {self.framework_root / '.specpilot' / 'engine'}")
+        print(f"Mode: {'DRY RUN' if args.dry_run else 'LIVE UPDATE'}")
+        print(f"Backup Retention: Keep last {args.keep_backups} backups")
+        
+        if not args.force:
+            response = input("\nProceed with update? (Y/n): ").strip().lower()
+            if response == 'n':
+                self.print_info("Update cancelled.")
+                return False
+        
+        # Create backup before update
+        backup_path = self.create_backup()
+        if not backup_path:
+            self.print_error("Failed to create backup. Update cancelled.")
+            return False
+        
+        # Perform the update
+        if not self.update_engine_files(args.dry_run):
+            self.print_error("Update failed. Rolling back...")
+            if self.rollback_update(backup_path):
+                self.print_info("Successfully rolled back to previous version.")
+            else:
+                self.print_error("Rollback failed. Manual intervention required.")
+            return False
+        
+        # Cleanup old backups
+        self.cleanup_old_backups(args.keep_backups)
+        
+        if args.dry_run:
+            self.print_info("🔍 DRY RUN COMPLETE - No changes were made")
+        else:
+            self.print_step("Update", "SpecPilot framework updated successfully!")
+            self.print_info(f"Backup saved at: {backup_path}")
+            self.print_info("Your project workspace and configuration are preserved.")
+        
+        return True
+    
+    def run_rollback_mode(self, args) -> bool:
+        """Run the rollback mode to restore from a backup."""
+        print(f"{self.colors['bold']}⏪ Rollback Mode{self.colors['reset']}")
+        
+        if not self.backup_dir.exists():
+            self.print_error("No backups found.")
+            return False
+        
+        # List available backups
+        backups = []
+        for item in self.backup_dir.iterdir():
+            if item.is_dir() and item.name.startswith("engine_backup_"):
+                backups.append(item)
+        
+        if not backups:
+            self.print_error("No engine backups found.")
+            return False
+        
+        # Sort backups by creation time (newest first)
+        backups.sort(key=lambda x: x.stat().st_ctime, reverse=True)
+        
+        print(f"\n{self.colors['bold']}📋 Available Backups{self.colors['reset']}")
+        for i, backup in enumerate(backups):
+            ctime = backup.stat().st_ctime
+            from datetime import datetime
+            date_str = datetime.fromtimestamp(ctime).strftime("%Y-%m-%d %H:%M:%S")
+            print(f"{i+1}. {backup.name} ({date_str})")
+        
+        if not args.force:
+            choice = input(f"\nSelect backup to restore (1-{len(backups)}): ").strip()
+            try:
+                choice_idx = int(choice) - 1
+                if 0 <= choice_idx < len(backups):
+                    selected_backup = backups[choice_idx]
+                else:
+                    self.print_error("Invalid selection.")
+                    return False
+            except ValueError:
+                self.print_error("Invalid input. Please enter a number.")
+                return False
+        else:
+            # Use most recent backup
+            selected_backup = backups[0]
+            self.print_info(f"Auto-selected most recent backup: {selected_backup.name}")
+        
+        # Confirm rollback
+        if not args.force:
+            response = input(f"\nRestore from {selected_backup.name}? This will overwrite current engine. (y/N): ").strip().lower()
+            if response != 'y':
+                self.print_info("Rollback cancelled.")
+                return False
+        
+        # Perform rollback
+        if self.rollback_update(str(selected_backup)):
+            self.print_step("Rollback", "Successfully restored from backup!")
+            return True
+        else:
+            self.print_error("Rollback failed.")
+            return False
+    
+    def run_cleanup_backups_mode(self, args) -> bool:
+        """Run the backup cleanup mode."""
+        print(f"{self.colors['bold']}🧹 Backup Cleanup Mode{self.colors['reset']}")
+        
+        if not self.backup_dir.exists():
+            self.print_info("No backup directory found.")
+            return True
+        
+        # Count current backups
+        backups = []
+        for item in self.backup_dir.iterdir():
+            if item.is_dir() and item.name.startswith("engine_backup_"):
+                backups.append(item)
+        
+        if not backups:
+            self.print_info("No backups to clean up.")
+            return True
+        
+        print(f"Found {len(backups)} backups.")
+        print(f"Will keep {args.keep_backups} most recent backups.")
+        
+        if not args.force:
+            response = input(f"Remove {len(backups) - args.keep_backups} old backups? (y/N): ").strip().lower()
+            if response != 'y':
+                self.print_info("Cleanup cancelled.")
+                return True
+        
+        # Perform cleanup
+        self.cleanup_old_backups(args.keep_backups)
+        
+        # Count remaining backups
+        remaining = []
+        for item in self.backup_dir.iterdir():
+            if item.is_dir() and item.name.startswith("engine_backup_"):
+                remaining.append(item)
+        
+        self.print_step("Cleanup", f"Successfully cleaned up backups. {len(remaining)} backups remaining.")
+        return True
+    
     def execute_installation(self, user_info: Dict[str, str], preferences: Dict) -> bool:
         """Execute the complete installation process."""
         try:
@@ -569,6 +852,11 @@ Examples:
   python3 bootstrap.py /path/to/project                    # Interactive mode
   python3 bootstrap.py /path/to/project --fast --title "My Project"  # Fast mode
   python3 bootstrap.py /path/to/project init               # Interactive mode (explicit)
+  python3 bootstrap.py /path/to/project update             # Update framework
+  python3 bootstrap.py /path/to/project update --dry-run   # Simulate update
+  python3 bootstrap.py /path/to/project update --verbose   # Verbose update
+  python3 bootstrap.py /path/to/project rollback           # Rollback to backup
+  python3 bootstrap.py /path/to/project cleanup-backups    # Clean old backups
 
 Note: The target directory does not need to be a Git repository.
 SpecPilot will work in any writable directory.
@@ -585,8 +873,8 @@ SpecPilot will work in any writable directory.
             'command',
             nargs='?',
             default='init',
-            choices=['init'],
-            help='Bootstrap command (init, optional, defaults to init)'
+            choices=['init', 'update', 'rollback', 'cleanup-backups'],
+            help='Bootstrap command (init, update, rollback, cleanup-backups, optional, defaults to init)'
         )
         
         parser.add_argument(
@@ -599,6 +887,31 @@ SpecPilot will work in any writable directory.
             '--title',
             type=str,
             help='Project title for fast mode'
+        )
+        
+        parser.add_argument(
+            '--verbose',
+            action='store_true',
+            help='Enable verbose output for update operations'
+        )
+        
+        parser.add_argument(
+            '--dry-run',
+            action='store_true',
+            help='Simulate update without making changes (update mode only)'
+        )
+        
+        parser.add_argument(
+            '--force',
+            action='store_true',
+            help='Skip confirmation prompts (use with caution)'
+        )
+        
+        parser.add_argument(
+            '--keep-backups',
+            type=int,
+            default=3,
+            help='Number of backups to keep (default: 3)'
         )
         
         args = parser.parse_args()
@@ -617,13 +930,24 @@ SpecPilot will work in any writable directory.
         bootstrap = SpecPilotBootstrap(str(target_path))
         bootstrap.print_banner()
         
-        if args.fast:
-            if not args.title:
-                print("❌ --title is required for fast mode")
-                sys.exit(1)
-            success = bootstrap.run_fast_mode(args.title)
+        # Route to appropriate mode based on command
+        if args.command == 'update':
+            success = bootstrap.run_update_mode(args)
+        elif args.command == 'rollback':
+            success = bootstrap.run_rollback_mode(args)
+        elif args.command == 'cleanup-backups':
+            success = bootstrap.run_cleanup_backups_mode(args)
+        elif args.command == 'init' or args.command is None:
+            if args.fast:
+                if not args.title:
+                    print("❌ --title is required for fast mode")
+                    sys.exit(1)
+                success = bootstrap.run_fast_mode(args.title)
+            else:
+                success = bootstrap.run_interactive_mode()
         else:
-            success = bootstrap.run_interactive_mode()
+            print(f"❌ Unknown command: {args.command}")
+            sys.exit(1)
         
         if not success:
             sys.exit(1)

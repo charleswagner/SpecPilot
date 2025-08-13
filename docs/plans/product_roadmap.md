@@ -78,6 +78,12 @@ T-shaped leaders, founders, or architects with:
 - **Intelligent Assistance** with mode-specific customization
 - **Command Integration** for seamless workflow
 
+### Framework Maintenance & Updates
+- **Bootstrap Update System** - Automated framework engine updates for existing projects
+- **Engine-Only Overwrite** - Preserve user workspace while updating framework files
+- **Version Compatibility Checking** - Ensure safe updates between framework versions
+- **Rollback Capability** - Safe recovery from failed updates
+
 ## MVP Development Phases
 
 ### Phase 1: Core Framework (Weeks 1-4)
@@ -105,10 +111,11 @@ T-shaped leaders, founders, or architects with:
 - [x] **Community Features** - Open source preparation and contribution systems
 
 ### Phase 5: Bootstrap Implementation (Weeks 17-18)
-- [ ] **Bootstrap Script Development** - Implement Python bootstrap installer with interactive and fast modes
-- [ ] **Installation Automation** - Automated project setup and framework installation
-- [ ] **User Onboarding** - Streamlined first-time user experience
-- [ ] **Distribution Ready** - Complete installation package for framework distribution
+- [x] **Bootstrap Script Development** - Implement Python bootstrap installer with interactive and fast modes
+- [x] **Installation Automation** - Automated project setup and framework installation
+- [x] **User Onboarding** - Streamlined first-time user experience
+- [x] **Distribution Ready** - Complete installation package for framework distribution
+- [ ] **Bootstrap Update Feature** - Add update functionality to bootstrap.py with engine-only overwrite capability
 
 ## Future Ideas Backlog
 
@@ -143,5 +150,5 @@ SpecPilot is the only framework that transforms experienced architects into elit
 
 ---
 
-**Roadmap Status**: 🚧 **BOOTSTRAP IN PROGRESS** - MVP complete, implementing installation automation
+**Roadmap Status**: 🚧 **BOOTSTRAP UPDATE IN PROGRESS** - MVP complete, implementing update automation
 **Next Phase**: 🚀 **Launch & Adoption** - Begin user validation and community building
